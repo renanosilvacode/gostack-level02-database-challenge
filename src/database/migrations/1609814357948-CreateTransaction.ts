@@ -28,7 +28,7 @@ export class CreateTransaction1609814357948 implements MigrationInterface {
             },
             {
               name: 'category_id',
-              type: 'varchar'
+              type: 'uuid'
             },
             {
               name: 'created_at',
