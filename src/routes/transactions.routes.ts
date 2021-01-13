@@ -13,9 +13,9 @@ transactionsRouter.get('/', async (request, response) => {
 
   const transactionsRepository = getRepository(Transaction);
 
-  const transactions = await transactionsRepository.find({ relations: ['Category']});
+  const transactions = await transactionsRepository.find({ relations: ['category']});
 
-  console.log(transactions);
+  return response.json(transactions);
 
 });
 
