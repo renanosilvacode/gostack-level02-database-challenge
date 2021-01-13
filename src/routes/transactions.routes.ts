@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getRepository } from 'typeorm';
 import Transaction from '../models/Transaction';
+import TransactionsRepository from '../repositories/TransactionsRepository';
 
 // import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
@@ -11,11 +12,11 @@ const transactionsRouter = Router();
 
 transactionsRouter.get('/', async (request, response) => {
 
-  const transactionsRepository = getRepository(Transaction);
+  const transactionsRepository = new TransactionsRepository();
 
-  const transactions = await transactionsRepository.find({ relations: ['category']});
+  const transactionsAndBalance = await transactionsRepository.getTransactions();
 
-  return response.json(transactions);
+  response.json(transactionsAndBalance);
 
 });
 
