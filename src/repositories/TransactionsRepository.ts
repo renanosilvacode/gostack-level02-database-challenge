@@ -24,6 +24,7 @@ interface ResponseDTO{
   balance: Balance;
 }
 
+
 @EntityRepository(Transaction)
 class TransactionsRepository extends Repository<Transaction> {
   public async getBalance(): Promise<Balance> {
@@ -31,9 +32,10 @@ class TransactionsRepository extends Repository<Transaction> {
     const transactionsRepository = getRepository(Transaction);
     const transactions = await transactionsRepository.find();
 
-    const income = transactions.filter(type => type.type === 'income').reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
-    const outcome = transactions.filter(type => type.type === 'outcome').reduce((accumulator, currentValue) => accumulator + currentValue.value, 0);
-    const total = income - outcome;
+    const income = transactions.filter(type => type.type === 'income').reduce((accumulator, element) => accumulator + Number(element.value), 0);
+    const outcome = transactions.filter(type => type.type === 'outcome').reduce((accumulator, element) => accumulator + Number(element.value), 0);
+    const total = income-outcome;
+
 
     const balance : Balance = ({
       income,
