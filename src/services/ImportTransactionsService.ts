@@ -1,8 +1,14 @@
 import Transaction from '../models/Transaction';
 
 class ImportTransactionsService {
-  async execute(): Promise<Transaction[]> {
-    // TODO
+  async execute(fileName: String): Promise<Transaction[]> {
+
+
+
+
+    const transaction: Transaction[] = [];
+
+    return transaction;
   }
 }
 
