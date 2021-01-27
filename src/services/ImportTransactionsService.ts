@@ -13,13 +13,17 @@ class ImportTransactionsService {
 
     const createTransactionService = new CreateTransactionService();
 
-    const trans = Object.assign({}, dataFromFile);
+    const transactions: Transaction[] = [];
+    dataFromFile.forEach((element: any) => {
+      transactions.push(element)
+    });
 
-    console.log(trans);
+    transactions.sort((t1) => (t1.type === 'income') ? 1: -1);
 
-    const transaction: Transaction[] = [];
+    const { title, type, value, category } = transactions[0];
+    const transaction  = await createTransactionService.execute({ title, type, value, category: category.title });
 
-    return transaction;
+    return transactions;
   }
 }
 
