@@ -9,21 +9,9 @@ class ImportTransactionsService {
 
     const loadCSVFile = new ImportCSV();
 
-    const dataFromFile = await loadCSVFile.loadCSV(uploadConfig.directory + '\\' + fileName);
+    const transactionsFromFile = await loadCSVFile.loadCSV(uploadConfig.directory + '\\' + fileName);
 
-    const createTransactionService = new CreateTransactionService();
-
-    const transactions: Transaction[] = [];
-    dataFromFile.forEach((element: any) => {
-      transactions.push(element)
-    });
-
-    transactions.sort((t1) => (t1.type === 'income') ? 1: -1);
-
-    const { title, type, value, category } = transactions[0];
-    const transaction  = await createTransactionService.execute({ title, type, value, category: category.title });
-
-    return transactions;
+    return transactionsFromFile;
   }
 }
 

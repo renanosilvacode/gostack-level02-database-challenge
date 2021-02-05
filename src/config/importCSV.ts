@@ -1,10 +1,21 @@
+import { getRepository, In } from 'typeorm';
+
 import csvParse from 'csv-parse';
 import fs from 'fs';
-import transactionsRouter from '../routes/transactions.routes';
+import Transaction from '../models/Transaction';
+import Category from '../models/Category';
+import TransactionsRepository from '../repositories/TransactionsRepository';
 
+
+interface CSVTransaction{
+  title: string;
+  type: 'income' | 'outcome';
+  value: number;
+  category: string;
+}
 export default class ImportCSV {
 
-  public async loadCSV(filePath: string): Promise<any>{
+  public async loadCSV(filePath: string): Promise<Transaction[]>{
 
     const readCSVStream = fs.createReadStream(filePath);
 
@@ -14,21 +25,62 @@ export default class ImportCSV {
 
     const parseCSV = readCSVStream.pipe(parseStream);
 
-    const lines: any[] = [];
+    const transactions: CSVTransaction[] = [];
+    const categories: string[] = []
 
     parseCSV.on('data', line => {
       const [title, type, value, category] = line.map((cell: string) =>
         cell.trim(),
       );
 
-      lines.push({title, type, value, category});
+      if(!title || !type || !value) return;
+
+      categories.push(category);
+      transactions.push({ title, type, value, category });
 
     })
 
-    await new Promise(resolve => {
-      parseCSV.on('end', resolve);
+    await new Promise(resolve => { parseCSV.on('end', resolve);});
+
+    const categoriesRepository = getRepository(Category);
+    const existsCategories = await categoriesRepository.find({
+      where: {
+        title: In(categories),
+      }
     });
 
-    return lines;
+    const existsCategoriesTitles = existsCategories.map(
+      (category: Category) => category.title,
+    );
+
+    const addCategoryTitles = categories.filter(
+      category => !existsCategoriesTitles.includes(category),
+    ).filter((value, index, self) => self.indexOf(value) === index);
+
+    const newCategories = categoriesRepository.create(
+      addCategoryTitles.map(title => ({
+        title,
+      })),
+    );
+
+    await categoriesRepository.save(newCategories);
+
+    const finalCategories = [...newCategories, ...existsCategories];
+
+    const transactionRepository = getRepository(Transaction);
+    const createdTransactions = transactionRepository.create(
+      transactions.map(transaction => ({
+        title: transaction.title,
+        type: transaction.type,
+        value: transaction.value,
+        category: finalCategories.find(category => category.title === transaction.title)
+      })),
+    );
+
+    await transactionRepository.save(createdTransactions);
+
+    await fs.promises.unlink(filePath);
+
+    return createdTransactions;
   }
 }
