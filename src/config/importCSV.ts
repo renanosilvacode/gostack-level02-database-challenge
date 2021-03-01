@@ -67,8 +67,6 @@ export default class ImportCSV {
 
     const finalCategories = [...newCategories, ...existsCategories];
 
-    console.log(`finalCategories: ${JSON.stringify(finalCategories)}`)
-
     const transactionRepository = getRepository(Transaction);
     const createdTransactions = transactionRepository.create(
       transactions.map(transaction => ({
